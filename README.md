@@ -1,97 +1,84 @@
-# VGA-ITS — Sistema Tutor Inteligente para Álgebra Linear
+# VGA-ITS - Intelligent Tutoring System
 
-Sistema Tutor Inteligente (ITS) para apoio ao ensino de **Álgebra Linear** (Matrizes e Vetores).  
-Utiliza IA Generativa (Llama 3 via Ollama) para tutoria adaptativa baseada no modelo do aluno.
+Um Sistema Tutor Inteligente (ITS) baseado em Inteligência Artificial, construído com arquitetura de microsserviços. O projeto utiliza IA Generativa (Llama 3 localmente com Ollama) para ensinar conceitos dinâmicos aos alunos com base no domínio do conhecimento (Knowledge Graph).
 
-## 🏗️ Stack Tecnológica
+## Tecnologias
 
-| Camada | Tecnologia |
-|--------|-----------|
-| **Frontend** | NextJS 15, TypeScript, TailwindCSS, Shadcn/UI, React Query, Zustand |
-| **Backend** | NestJS, TypeScript, Prisma ORM, SQLite |
-| **IA** | Ollama + Llama 3 |
-| **Infra** | Docker + Docker Compose |
+- **Frontend:** Next.js 15 (React), TailwindCSS, TypeScript
+- **Backend:** NestJS 11, TypeScript, Mongoose
+- **Banco de Dados:** MongoDB
+- **Inteligência Artificial:** Ollama (Llama 3 8B)
+- **Infraestrutura:** Docker & Docker Compose
 
-## 🚀 Como Executar
+---
 
-### Pré-requisitos
-- Node.js 18+
-- Docker e Docker Compose (para execução com contêineres)
+## 🚀 Pré-requisitos
 
-### Execução Local (Desenvolvimento)
+Para rodar o projeto, você precisa apenas ter instalado em sua máquina:
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-**1. Backend:**
+---
+
+## ⚙️ Como Rodar o Projeto (CPU)
+
+1. **Inicie os serviços com Docker Compose:**
+   Na raiz do projeto (onde está localizado este arquivo), execute:
+   ```bash
+   docker compose up -d --build
+   ```
+   *Isso irá construir as imagens do frontend e backend, e subir os contêineres do MongoDB e do Ollama.*
+
+2. **Baixe o Modelo de IA (Llama 3):**
+   Como a inteligência artificial roda 100% localmente de forma privada, precisamos baixar o modelo base (aprox. 4.7 GB). Com os contêineres rodando, execute no terminal:
+   ```bash
+   docker compose exec -d ollama ollama pull llama3
+   ```
+   *Aguarde alguns minutos dependendo da sua velocidade de internet. O download rodará em background.*
+
+3. **Acessando a Aplicação:**
+   - **Frontend (Interface):** [http://localhost:3000](http://localhost:3000)
+   - **Backend (API):** [http://localhost:3001/api](http://localhost:3001/api)
+
+   > **Nota:** O banco de dados é populado automaticamente na primeira vez que o backend é iniciado através do script de seed integrado. Não é necessário criar tabelas ou rodar scripts manuais!
+
+---
+
+## ⚡ Acelerando com Placa de Vídeo (NVIDIA GPU)
+
+Se você tiver uma placa de vídeo NVIDIA, é altamente recomendável ativá-la para que as respostas da inteligência artificial sejam instantâneas.
+
+### 1. Instalar o NVIDIA Container Toolkit (Para Linux)
+O Docker precisa de um pacote extra para reconhecer sua placa de vídeo:
 ```bash
-cd backend
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
-npx tsx prisma/seed.ts
-npm run start:dev
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+```
+*(Para usuários de Windows usando WSL2 ou Docker Desktop, o suporte a GPU já vem ativado por padrão nas versões recentes).*
+
+### 2. Ativar no docker-compose.yml
+Abra o arquivo `docker-compose.yml` e remova o comentário (`#`) da linha `gpus: all` dentro do serviço `ollama`:
+```yaml
+  ollama:
+    # ...
+    gpus: all
 ```
 
-**2. Frontend:**
+### 3. Reiniciar o ambiente
 ```bash
-cd frontend
-npm install
-npm run dev
+docker compose up -d
 ```
 
-**3. Ollama (opcional — necessário para o chat com IA):**
-```bash
-docker run -d -p 11434:11434 --name ollama ollama/ollama
-docker exec ollama ollama pull llama3
-```
+---
 
-### Execução com Docker Compose
-```bash
-docker compose up --build
+## 🛠 Comandos Úteis
 
-# Em outro terminal, baixar o modelo Llama 3:
-docker compose exec ollama ollama pull llama3
-```
-
-## 📋 Funcionalidades
-
-1. **Avaliação Diagnóstica** — Quiz com 25 questões cobrindo 11 conceitos
-2. **Grafo de Conhecimento** — Visualização do progresso com cores (verde/amarelo/vermelho/cinza)
-3. **Modelo do Aluno** — Rastreia domínio, exercícios e histórico por conceito
-4. **Chatbot Tutor** — IA adaptativa que explica, cria exercícios e dá dicas progressivas
-5. **Atualização de Mastery** — Acerto (+20%), Erro (-10%), Acerto com dica (+10%)
-6. **Dashboard** — Progresso geral, estatísticas e grafo interativo
-
-## 🗂️ Conceitos do Grafo de Conhecimento
-
-| ID | Conceito | Categoria |
-|----|----------|-----------|
-| M1 | Conceitos Básicos de Matrizes | Matrizes |
-| M2 | Operações com Matrizes | Matrizes |
-| M3 | Determinantes | Matrizes |
-| M4 | Sistemas Lineares | Matrizes |
-| V1 | Conceitos Básicos de Vetores | Vetores |
-| V2 | Representação Vetorial | Vetores |
-| V3 | Operações com Vetores | Vetores |
-| V4 | Módulo de Vetores | Vetores |
-| V5 | Produto Escalar | Vetores |
-| V6 | Ângulo entre Vetores | Vetores |
-| V7 | Ortogonalidade | Vetores |
-
-## 🔗 API Endpoints
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/students` | Cadastrar aluno |
-| POST | `/api/students/login` | Login |
-| GET | `/api/students/:id/progress` | Progresso do aluno |
-| PATCH | `/api/students/:id/mastery` | Atualizar mastery |
-| POST | `/api/assessments/start` | Iniciar avaliação |
-| POST | `/api/assessments/:id/answer` | Responder questão |
-| POST | `/api/assessments/:id/finish` | Finalizar avaliação |
-| GET | `/api/assessments/:id/result` | Resultado |
-| GET | `/api/knowledge-graph/:studentId` | Grafo do aluno |
-| POST | `/api/chat/sessions` | Criar sessão de chat |
-| POST | `/api/chat/message` | Enviar mensagem |
-
-## 📚 Disciplina
-
-IA Aplicada à Educação — UFRN/IMD
+- **Ver logs em tempo real (todos):** `docker compose logs -f`
+- **Ver logs apenas do Backend:** `docker compose logs -f backend`
+- **Derrubar o projeto:** `docker compose down`
+- **Derrubar o projeto e resetar o Banco de Dados:** `docker compose down -v`
