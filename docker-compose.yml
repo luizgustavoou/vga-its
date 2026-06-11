@@ -52,6 +52,9 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
+    # IMPORTANTE: Descomente a linha abaixo (gpus: all) apenas se o seu sistema 
+    # possuir uma Placa de Vídeo NVIDIA e o NVIDIA Container Toolkit instalado.
+    # Caso contrário, o Docker apresentará erro ao subir o contêiner.
     gpus: all
     restart: unless-stopped
 
