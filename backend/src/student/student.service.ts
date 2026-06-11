@@ -7,6 +7,7 @@ import * as crypto from 'crypto';
 import { Student } from '../schemas/student.schema';
 import { StudentKnowledge } from '../schemas/student-knowledge.schema';
 import { KnowledgeNode } from '../schemas/knowledge-node.schema';
+import { Assessment } from '../schemas/assessment.schema';
 
 @Injectable()
 export class StudentService {
@@ -14,6 +15,7 @@ export class StudentService {
     @InjectModel(Student.name) private studentModel: Model<Student>,
     @InjectModel(StudentKnowledge.name) private studentKnowledgeModel: Model<StudentKnowledge>,
     @InjectModel(KnowledgeNode.name) private knowledgeNodeModel: Model<KnowledgeNode>,
+    @InjectModel(Assessment.name) private assessmentModel: Model<Assessment>,
   ) {}
 
   private hashPassword(password: string): string {
@@ -48,6 +50,7 @@ export class StudentService {
       id: student._id.toString(),
       name: student.name,
       email: student.email,
+      hasCompletedAssessment: false,
     };
   }
 
@@ -58,10 +61,16 @@ export class StudentService {
       throw new UnauthorizedException('Email ou senha inválidos');
     }
 
+    const completedAssessment = await this.assessmentModel.findOne({
+      studentId: student._id,
+      status: 'completed'
+    });
+
     return {
       id: student._id.toString(),
       name: student.name,
       email: student.email,
+      hasCompletedAssessment: !!completedAssessment,
     };
   }
 

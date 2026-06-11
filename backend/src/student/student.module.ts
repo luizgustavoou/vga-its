@@ -5,6 +5,7 @@ import { StudentService } from './student.service';
 import { Student, StudentSchema } from '../schemas/student.schema';
 import { StudentKnowledge, StudentKnowledgeSchema } from '../schemas/student-knowledge.schema';
 import { KnowledgeNode, KnowledgeNodeSchema } from '../schemas/knowledge-node.schema';
+import { Assessment, AssessmentSchema } from '../schemas/assessment.schema';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { KnowledgeNode, KnowledgeNodeSchema } from '../schemas/knowledge-node.sc
       { name: Student.name, schema: StudentSchema },
       { name: StudentKnowledge.name, schema: StudentKnowledgeSchema },
       { name: KnowledgeNode.name, schema: KnowledgeNodeSchema },
+      { name: Assessment.name, schema: AssessmentSchema },
     ]),
   ],
   controllers: [StudentController],

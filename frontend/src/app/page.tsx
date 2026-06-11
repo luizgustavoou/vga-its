@@ -25,11 +25,16 @@ export default function LoginPage() {
       if (isLogin) {
         const res = await studentApi.login({ email, password });
         setStudent(res.data.id, res.data.name, res.data.email);
+        if (res.data.hasCompletedAssessment) {
+          router.push('/dashboard');
+        } else {
+          router.push('/assessment');
+        }
       } else {
         const res = await studentApi.create({ name, email, password });
         setStudent(res.data.id, res.data.name, res.data.email);
+        router.push('/assessment');
       }
-      router.push('/assessment');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Erro ao processar. Tente novamente.');

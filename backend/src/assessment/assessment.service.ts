@@ -27,8 +27,7 @@ export class AssessmentService {
 
     const existing = await this.assessmentModel.findOne({
       studentId: new Types.ObjectId(studentId),
-      status: 'in_progress',
-    });
+    }).sort({ createdAt: -1 });
 
     if (existing) {
       return this.getAssessmentWithQuestions(existing._id.toString());
