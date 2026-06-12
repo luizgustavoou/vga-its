@@ -67,15 +67,23 @@ function ChatContent() {
       const sessionRes = await chatApi.createSession(studentId!, nodeId);
       setCurrentSessionId(sessionRes.data.sessionId);
 
-      // Add greeting as first message
-      setMessages([
-        {
-          id: 'greeting',
-          role: 'assistant',
-          content: sessionRes.data.greeting,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      if (sessionRes.data.messages && sessionRes.data.messages.length > 0) {
+        setMessages(sessionRes.data.messages.map((m: any) => ({
+          id: m.id || m._id,
+          role: m.role,
+          content: m.content,
+          createdAt: m.createdAt || new Date().toISOString(),
+        })));
+      } else if (sessionRes.data.greeting) {
+        setMessages([
+          {
+            id: 'greeting',
+            role: 'assistant',
+            content: sessionRes.data.greeting,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      }
     } catch {
       console.error('Erro ao inicializar chat');
     } finally {
@@ -108,6 +116,10 @@ function ChatContent() {
           createdAt: new Date().toISOString(),
         },
       ]);
+      
+      if (res.data.updatedMastery !== undefined && currentNode) {
+        setCurrentNode({ ...currentNode, masteryLevel: res.data.updatedMastery });
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -143,7 +155,10 @@ function ChatContent() {
   const handleCorrectAnswer = async () => {
     if (!studentId || !nodeId) return;
     try {
-      await studentApi.updateMastery(studentId, nodeId, 'correct');
+      const res = await studentApi.updateMastery(studentId, nodeId, 'correct');
+      if (currentNode && res.data.masteryLevel !== undefined) {
+        setCurrentNode({ ...currentNode, masteryLevel: res.data.masteryLevel });
+      }
       sendMessage('Acertei o exercício! ✅');
     } catch {
       console.error('Erro ao atualizar mastery');
@@ -153,7 +168,10 @@ function ChatContent() {
   const handleWrongAnswer = async () => {
     if (!studentId || !nodeId) return;
     try {
-      await studentApi.updateMastery(studentId, nodeId, 'incorrect');
+      const res = await studentApi.updateMastery(studentId, nodeId, 'incorrect');
+      if (currentNode && res.data.masteryLevel !== undefined) {
+        setCurrentNode({ ...currentNode, masteryLevel: res.data.masteryLevel });
+      }
       sendMessage('Errei o exercício. Pode me ajudar a entender?');
     } catch {
       console.error('Erro ao atualizar mastery');

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { KnowledgeNode } from '../schemas/knowledge-node.schema';
 import { StudentKnowledge } from '../schemas/student-knowledge.schema';
 
@@ -26,7 +26,7 @@ export class KnowledgeService {
 
   async getStudentGraph(studentId: string) {
     const nodes = await this.knowledgeNodeModel.find().sort({ order: 1 });
-    const knowledges = await this.studentKnowledgeModel.find({ studentId });
+    const knowledges = await this.studentKnowledgeModel.find({ studentId: new Types.ObjectId(studentId) });
 
     return nodes.map((node) => {
       const knowledge = knowledges.find(k => k.nodeId === node.nodeId);

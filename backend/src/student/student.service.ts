@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { LoginStudentDto } from './dto/login-student.dto';
 import * as crypto from 'crypto';
@@ -92,7 +92,7 @@ export class StudentService {
     const student = await this.findById(studentId);
 
     // Mongoose: find knowledges and manually join nodes or use a lookup, but here we can just query both
-    const knowledges = await this.studentKnowledgeModel.find({ studentId });
+    const knowledges = await this.studentKnowledgeModel.find({ studentId: new Types.ObjectId(studentId) });
     const nodes = await this.knowledgeNodeModel.find();
     
     // Merge them in memory (since we don't have true foreign key refs to KnowledgeNode's ObjectID, we link by nodeId string)
@@ -137,10 +137,21 @@ export class StudentService {
     nodeId: string,
     event: 'correct' | 'incorrect' | 'correct_with_hint',
   ) {
-    const knowledge = await this.studentKnowledgeModel.findOne({ studentId, nodeId });
+    let knowledge = await this.studentKnowledgeModel.findOne({
+      studentId: new Types.ObjectId(studentId),
+      nodeId,
+    });
 
     if (!knowledge) {
-      throw new NotFoundException('Conhecimento do aluno não encontrado');
+      knowledge = new this.studentKnowledgeModel({
+        studentId: new Types.ObjectId(studentId),
+        nodeId,
+        masteryLevel: 0,
+        status: 'not_started',
+        exercisesCount: 0,
+        correctCount: 0,
+        hintCount: 0,
+      });
     }
 
     let delta = 0;

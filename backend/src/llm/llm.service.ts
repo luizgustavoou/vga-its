@@ -53,6 +53,7 @@ export class LlmService {
 
   async chat(
     messages: { role: string; content: string }[],
+    format?: 'json',
   ): Promise<string> {
     try {
       const response = await fetch(`${this.baseUrl}/api/chat`, {
@@ -62,6 +63,7 @@ export class LlmService {
           model: this.model,
           messages,
           stream: false,
+          format,
           options: {
             temperature: 0.7,
             top_p: 0.9,

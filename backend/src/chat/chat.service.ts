@@ -8,6 +8,7 @@ import { ChatMessage } from '../schemas/chat-message.schema';
 import { Student } from '../schemas/student.schema';
 import { KnowledgeNode } from '../schemas/knowledge-node.schema';
 import { StudentKnowledge } from '../schemas/student-knowledge.schema';
+import { StudentService } from '../student/student.service';
 
 @Injectable()
 export class ChatService {
@@ -18,6 +19,7 @@ export class ChatService {
     @InjectModel(KnowledgeNode.name) private knowledgeNodeModel: Model<KnowledgeNode>,
     @InjectModel(StudentKnowledge.name) private studentKnowledgeModel: Model<StudentKnowledge>,
     private llmService: LlmService,
+    private studentService: StudentService,
   ) {}
 
   async createSession(studentId: string, nodeId: string) {
@@ -27,20 +29,36 @@ export class ChatService {
     const node = await this.knowledgeNodeModel.findOne({ nodeId });
     if (!node) throw new NotFoundException('Conceito não encontrado');
 
-    // Close any active sessions
+    let session = await this.learningSessionModel.findOne({
+      studentId: new Types.ObjectId(studentId),
+      currentNodeId: nodeId,
+      status: 'active',
+    });
+
+    if (session) {
+      const messages = await this.getSessionMessages(session._id.toString());
+      return {
+        sessionId: session._id.toString(),
+        nodeId: node.nodeId,
+        nodeLabel: node.label,
+        messages,
+      };
+    }
+
+    // Close any other active sessions
     await this.learningSessionModel.updateMany(
       { studentId: new Types.ObjectId(studentId), status: 'active' },
       { $set: { status: 'completed', endedAt: new Date() } }
     );
 
-    const session = await this.learningSessionModel.create({
+    session = await this.learningSessionModel.create({
       studentId: new Types.ObjectId(studentId),
       currentNodeId: nodeId,
     });
 
-    const knowledge = await this.studentKnowledgeModel.findOne({ studentId, nodeId });
+    const knowledge = await this.studentKnowledgeModel.findOne({ studentId: new Types.ObjectId(studentId), nodeId });
 
-    const allKnowledges = await this.studentKnowledgeModel.find({ studentId });
+    const allKnowledges = await this.studentKnowledgeModel.find({ studentId: new Types.ObjectId(studentId) });
     const allNodes = await this.knowledgeNodeModel.find();
 
     const knowledgesWithNodes = allKnowledges.map(k => ({
@@ -67,13 +85,19 @@ export class ChatService {
       content: systemPrompt,
     });
 
-    const greeting = await this.llmService.chat([
+    const rawGreeting = await this.llmService.chat([
       { role: 'system', content: systemPrompt },
       {
         role: 'user',
         content: `Olá! Estou pronto para estudar ${node.label}. Pode me apresentar o conceito?`,
       },
-    ]);
+    ], 'json');
+
+    let greeting = rawGreeting;
+    try {
+      const parsed = JSON.parse(rawGreeting);
+      greeting = parsed.message || rawGreeting;
+    } catch (e) {}
 
     await this.chatMessageModel.create({
       sessionId: session._id,
@@ -81,11 +105,13 @@ export class ChatService {
       content: greeting,
     });
 
+    const initialMessages = await this.getSessionMessages(session._id.toString());
+
     return {
       sessionId: session._id.toString(),
       nodeId: node.nodeId,
       nodeLabel: node.label,
-      greeting,
+      messages: initialMessages,
     };
   }
 
@@ -106,18 +132,40 @@ export class ChatService {
       content: m.content,
     }));
 
-    const response = await this.llmService.chat(llmMessages);
+    const rawResponse = await this.llmService.chat(llmMessages, 'json');
+    let responseText = rawResponse;
+    let evaluation = 'none';
+
+    try {
+      const parsed = JSON.parse(rawResponse);
+      if (parsed.message) responseText = parsed.message;
+      if (parsed.evaluation) evaluation = parsed.evaluation;
+    } catch (e) {
+      console.error('Falha ao parsear JSON do LLM', e);
+    }
+
+    let updatedMastery: number | undefined;
+
+    if (['correct', 'incorrect', 'correct_with_hint'].includes(evaluation)) {
+      const masteryResult = await this.studentService.updateMastery(
+        session.studentId.toString(),
+        session.currentNodeId,
+        evaluation as 'correct' | 'incorrect' | 'correct_with_hint'
+      );
+      updatedMastery = masteryResult.masteryLevel;
+    }
 
     await this.chatMessageModel.create({
       sessionId: new Types.ObjectId(sessionId),
       role: 'assistant',
-      content: response,
+      content: responseText,
     });
 
     return {
       role: 'assistant',
-      content: response,
+      content: responseText,
       sessionId,
+      updatedMastery,
     };
   }
 
