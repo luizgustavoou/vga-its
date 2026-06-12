@@ -166,7 +166,7 @@ function ChatContent() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="absolute inset-0 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="glass-card rounded-none border-x-0 border-t-0 p-4 shrink-0 w-full flex justify-center">
         <div className="w-full max-w-5xl flex items-center justify-between">
@@ -217,7 +217,7 @@ function ChatContent() {
                     <Brain className="w-3 h-3" /> Tutor IA
                   </div>
                 )}
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
               </div>
             </div>
           ))}
