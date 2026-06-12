@@ -106,8 +106,8 @@ export default function AssessmentPage() {
   const progress = totalQuestions > 0 ? ((answeredCount + (feedback ? 1 : 0)) / totalQuestions) * 100 : 0;
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+    <main className="min-h-screen p-4 md:p-8 w-full flex flex-col items-center">
+      <div className="w-full max-w-3xl">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8 animate-fade-in">
           <div className="p-2 rounded-xl gradient-primary">
@@ -207,7 +207,7 @@ export default function AssessmentPage() {
                 <button
                   onClick={handleAnswer}
                   disabled={!selectedAnswer || loading}
-                  className="px-6 py-3 rounded-xl gradient-primary text-white font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-8 py-4 rounded-xl gradient-primary text-white font-semibold transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 text-base"
                 >
                   Confirmar Resposta
                 </button>
@@ -215,7 +215,7 @@ export default function AssessmentPage() {
                 <button
                   onClick={handleNext}
                   disabled={loading}
-                  className="px-6 py-3 rounded-xl gradient-primary text-white font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 flex items-center gap-2"
+                  className="px-8 py-4 rounded-xl gradient-primary text-white font-semibold transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 text-base"
                 >
                   {answeredCount + 1 >= totalQuestions ? 'Ver Resultado' : 'Próxima Questão'}
                   <ArrowRight className="w-5 h-5" />

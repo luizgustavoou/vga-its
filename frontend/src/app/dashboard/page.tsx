@@ -122,8 +122,8 @@ export default function DashboardPage() {
   const firstPendingNode = nodes.find(n => n.status !== 'mastered');
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen p-4 md:p-8 w-full flex flex-col items-center">
+      <div className="w-full max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div className="flex items-center gap-3">
@@ -141,19 +141,22 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
           {[
             { label: 'Progresso Geral', value: `${Math.round(progress?.overallProgress || 0)}%`, icon: TrendingUp, color: 'text-primary' },
             { label: 'Exercícios', value: progress?.totalExercises || 0, icon: BookOpen, color: 'text-accent' },
             { label: 'Acertos', value: progress?.totalCorrect || 0, icon: Target, color: 'text-success' },
             { label: 'Taxa de Sucesso', value: `${progress?.successRate || 0}%`, icon: CheckCircle2, color: 'text-warning' },
           ].map((stat, i) => (
-            <div key={i} className="glass-card p-4 animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
-              <div className="flex items-center gap-2 mb-1">
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+            <div key={i} className="glass-card p-6 flex flex-col gap-3 relative overflow-hidden group animate-slide-up hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1" style={{ animationDelay: `${i * 100}ms` }}>
+              <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-muted/20 opacity-0 group-hover:opacity-100 transition-opacity blur-2xl pointer-events-none"></div>
+              <div className="flex justify-between items-center w-full">
+                <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
+                <div className={`p-2.5 rounded-xl bg-muted/50 bg-opacity-10`}>
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
               </div>
-              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-3xl font-extrabold tracking-tight">{stat.value}</p>
             </div>
           ))}
         </div>
@@ -161,9 +164,11 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Knowledge Graph */}
           <div className="md:col-span-2">
-            <div className="glass-card p-6 animate-slide-up">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Brain className="w-5 h-5 text-primary" />
+            <div className="glass-card p-6 md:p-8 animate-slide-up">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  <Brain className="w-5 h-5" />
+                </div>
                 Grafo de Conhecimento
               </h2>
 
@@ -230,7 +235,7 @@ export default function DashboardPage() {
                           </span>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleStartStudy(node.id); }}
-                            className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-1"
+                            className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-medium transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
                           >
                             <MessageCircle className="w-4 h-4" /> Estudar
                           </button>
@@ -261,23 +266,26 @@ export default function DashboardPage() {
           <div className="space-y-6">
             {/* Current Concept */}
             {progress?.currentConcept && (
-              <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+              <div className="glass-card p-6 md:p-8 flex flex-col gap-2 animate-slide-up relative overflow-hidden" style={{ animationDelay: '200ms' }}>
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+                <h3 className="text-xs font-bold text-primary flex items-center gap-2 uppercase tracking-wider mb-2">
                   <Target className="w-4 h-4" /> Conceito Atual
                 </h3>
-                <p className="text-lg font-bold mb-1">{progress.currentConcept.label}</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Domínio: {Math.round(progress.currentConcept.mastery)}%
-                </p>
-                <div className="h-2 bg-muted rounded-full overflow-hidden mb-4">
+                <p className="text-xl font-extrabold">{progress.currentConcept.label}</p>
+                
+                <div className="flex justify-between items-end mt-4">
+                  <span className="text-sm font-medium text-muted-foreground">Domínio Atual</span>
+                  <span className="text-xl font-bold text-primary">{Math.round(progress.currentConcept.mastery)}%</span>
+                </div>
+                <div className="h-2.5 bg-muted rounded-full overflow-hidden my-4 shadow-inner">
                   <div
-                    className="h-full gradient-primary rounded-full transition-all duration-500"
+                    className="h-full gradient-primary rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${progress.currentConcept.mastery}%` }}
                   />
                 </div>
                 <button
                   onClick={() => handleStartStudy(progress.currentConcept!.id)}
-                  className="w-full py-3 rounded-xl gradient-primary text-white font-semibold transition-all hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl gradient-primary text-white font-semibold transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 mt-4 text-base relative z-10"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Continuar Estudando
@@ -288,13 +296,15 @@ export default function DashboardPage() {
 
             {/* Quick study */}
             {firstPendingNode && firstPendingNode.id !== progress?.currentConcept?.id && (
-              <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">📚 Próximo Conceito</h3>
-                <p className="font-semibold mb-1">{firstPendingNode.label}</p>
-                <p className="text-xs text-muted-foreground mb-3">{firstPendingNode.description}</p>
+              <div className="glass-card p-6 md:p-8 animate-slide-up border-l-4 border-l-accent" style={{ animationDelay: '300ms' }}>
+                <h3 className="text-xs font-bold text-accent flex items-center gap-2 uppercase tracking-wider mb-3">
+                  <BookOpen className="w-4 h-4" /> Próximo Conceito
+                </h3>
+                <p className="text-lg font-bold mb-2">{firstPendingNode.label}</p>
+                <p className="text-sm text-muted-foreground mb-6 line-clamp-2 leading-relaxed">{firstPendingNode.description}</p>
                 <button
                   onClick={() => handleStartStudy(firstPendingNode.id)}
-                  className="w-full py-2.5 rounded-xl bg-muted text-foreground font-medium transition-all hover:bg-muted/80 flex items-center justify-center gap-2 text-sm"
+                  className="w-full py-4 rounded-xl bg-accent/10 text-accent font-semibold transition-all duration-300 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/25 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 text-sm"
                 >
                   Começar <ArrowRight className="w-4 h-4" />
                 </button>
@@ -302,26 +312,25 @@ export default function DashboardPage() {
             )}
 
             {/* Progress overview */}
-            <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">📈 Resumo</h3>
+            <div className="glass-card p-6 md:p-8 animate-slide-up" style={{ animationDelay: '400ms' }}>
+              <h3 className="text-xs font-bold text-primary flex items-center gap-2 uppercase tracking-wider mb-5">
+                <TrendingUp className="w-4 h-4" /> Resumo do Progresso
+              </h3>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Conceitos dominados</span>
-                  <span className="font-semibold text-success">
-                    {nodes.filter(n => n.status === 'mastered').length}/{nodes.length}
-                  </span>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-success/5 border border-success/10 transition-colors hover:bg-success/10">
+                  <span className="text-sm font-medium text-foreground">Dominados</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold text-success">{nodes.filter(n => n.status === 'mastered').length}</span>
+                    <span className="text-sm text-muted-foreground">/ {nodes.length}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Em progresso</span>
-                  <span className="font-semibold text-warning">
-                    {nodes.filter(n => n.status === 'in_progress').length}
-                  </span>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-warning/5 border border-warning/10 transition-colors hover:bg-warning/10">
+                  <span className="text-sm font-medium text-foreground">Em progresso</span>
+                  <span className="text-xl font-bold text-warning">{nodes.filter(n => n.status === 'in_progress').length}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Com dificuldade</span>
-                  <span className="font-semibold text-destructive">
-                    {nodes.filter(n => n.status === 'struggling').length}
-                  </span>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-destructive/5 border border-destructive/10 transition-colors hover:bg-destructive/10">
+                  <span className="text-sm font-medium text-foreground">Com dificuldade</span>
+                  <span className="text-xl font-bold text-destructive">{nodes.filter(n => n.status === 'struggling').length}</span>
                 </div>
               </div>
             </div>

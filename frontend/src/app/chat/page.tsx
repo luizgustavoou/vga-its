@@ -152,31 +152,7 @@ function ChatContent() {
     sendMessage('Pode me explicar esse conceito de forma simples?');
   };
 
-  const handleCorrectAnswer = async () => {
-    if (!studentId || !nodeId) return;
-    try {
-      const res = await studentApi.updateMastery(studentId, nodeId, 'correct');
-      if (currentNode && res.data.masteryLevel !== undefined) {
-        setCurrentNode({ ...currentNode, masteryLevel: res.data.masteryLevel });
-      }
-      sendMessage('Acertei o exercício! ✅');
-    } catch {
-      console.error('Erro ao atualizar mastery');
-    }
-  };
 
-  const handleWrongAnswer = async () => {
-    if (!studentId || !nodeId) return;
-    try {
-      const res = await studentApi.updateMastery(studentId, nodeId, 'incorrect');
-      if (currentNode && res.data.masteryLevel !== undefined) {
-        setCurrentNode({ ...currentNode, masteryLevel: res.data.masteryLevel });
-      }
-      sendMessage('Errei o exercício. Pode me ajudar a entender?');
-    } catch {
-      console.error('Erro ao atualizar mastery');
-    }
-  };
 
   if (initializing) {
     return (
@@ -192,8 +168,8 @@ function ChatContent() {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="glass-card rounded-none border-x-0 border-t-0 p-4 shrink-0">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <header className="glass-card rounded-none border-x-0 border-t-0 p-4 shrink-0 w-full flex justify-center">
+        <div className="w-full max-w-5xl flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/dashboard')}
@@ -222,15 +198,15 @@ function ChatContent() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 w-full flex flex-col items-center">
+        <div className="w-full max-w-3xl space-y-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
               <div
-                className={`max-w-[85%] md:max-w-[70%] p-4 rounded-2xl ${
+                className={`w-fit max-w-[85%] md:max-w-[70%] px-5 py-3 rounded-2xl ${
                   msg.role === 'user'
                     ? 'gradient-primary text-white rounded-br-md'
                     : 'glass-card rounded-bl-md'
@@ -247,8 +223,8 @@ function ChatContent() {
           ))}
 
           {loading && (
-            <div className="flex justify-start animate-fade-in">
-              <div className="glass-card p-4 rounded-2xl rounded-bl-md">
+            <div className="flex justify-start animate-fade-in w-full">
+              <div className="w-fit px-5 py-3 glass-card rounded-2xl rounded-bl-md">
                 <div className="flex items-center gap-2 text-primary">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Tutor está pensando...</span>
@@ -262,41 +238,35 @@ function ChatContent() {
       </div>
 
       {/* Quick actions */}
-      <div className="shrink-0 px-4 pb-2">
-        <div className="max-w-3xl mx-auto flex flex-wrap gap-2">
-          <button onClick={handleExplain} className="px-3 py-1.5 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors flex items-center gap-1">
-            <BookOpen className="w-3 h-3" /> Explicar conceito
+      <div className="shrink-0 px-4 pb-2 w-full flex justify-center">
+        <div className="w-full max-w-3xl flex flex-wrap gap-2">
+          <button onClick={handleExplain} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 shrink-0" /> Explicar conceito
           </button>
-          <button onClick={handleExercise} className="px-3 py-1.5 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors flex items-center gap-1">
-            <MessageCircle className="w-3 h-3" /> Criar exercício
+          <button onClick={handleExercise} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
+            <MessageCircle className="w-4 h-4 shrink-0" /> Criar exercício
           </button>
-          <button onClick={handleHint} className="px-3 py-1.5 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors flex items-center gap-1">
-            <Lightbulb className="w-3 h-3" /> Pedir dica
-          </button>
-          <button onClick={handleCorrectAnswer} className="px-3 py-1.5 rounded-full bg-success/10 text-xs font-medium text-success hover:bg-success/20 transition-colors">
-            ✅ Acertei
-          </button>
-          <button onClick={handleWrongAnswer} className="px-3 py-1.5 rounded-full bg-destructive/10 text-xs font-medium text-destructive hover:bg-destructive/20 transition-colors">
-            ❌ Errei
+          <button onClick={handleHint} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 shrink-0" /> Pedir dica
           </button>
         </div>
       </div>
 
       {/* Input */}
-      <div className="shrink-0 p-4 glass-card rounded-none border-x-0 border-b-0">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-3">
+      <div className="shrink-0 px-4 pb-6 pt-2 w-full flex justify-center bg-background/80 backdrop-blur-md">
+        <form onSubmit={handleSubmit} className="w-full max-w-3xl flex items-center gap-2 bg-muted/40 p-2 rounded-2xl border border-border/50 shadow-sm focus-within:border-primary/50 transition-colors">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua mensagem..."
             disabled={loading}
-            className="flex-1 px-4 py-3 rounded-xl bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+            className="flex-1 bg-transparent px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="px-5 py-3 rounded-xl gradient-primary text-white font-medium transition-all hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="shrink-0 p-3.5 rounded-xl gradient-primary text-white font-medium transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             <Send className="w-5 h-5" />
           </button>

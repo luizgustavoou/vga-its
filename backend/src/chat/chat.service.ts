@@ -29,14 +29,24 @@ export class ChatService {
     const node = await this.knowledgeNodeModel.findOne({ nodeId });
     if (!node) throw new NotFoundException('Conceito não encontrado');
 
-    let session = await this.learningSessionModel.findOne({
-      studentId: new Types.ObjectId(studentId),
-      currentNodeId: nodeId,
-      status: 'active',
-    });
+    let session = await this.learningSessionModel.findOneAndUpdate(
+      { studentId: new Types.ObjectId(studentId), currentNodeId: nodeId },
+      { $set: { status: 'active' } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
-    if (session) {
-      const messages = await this.getSessionMessages(session._id.toString());
+    // Close any other active sessions
+    await this.learningSessionModel.updateMany(
+      { 
+        studentId: new Types.ObjectId(studentId), 
+        _id: { $ne: session._id },
+        status: 'active' 
+      },
+      { $set: { status: 'completed', endedAt: new Date() } }
+    );
+
+    const messages = await this.getSessionMessages(session._id.toString());
+    if (messages.length > 0) {
       return {
         sessionId: session._id.toString(),
         nodeId: node.nodeId,
@@ -44,17 +54,6 @@ export class ChatService {
         messages,
       };
     }
-
-    // Close any other active sessions
-    await this.learningSessionModel.updateMany(
-      { studentId: new Types.ObjectId(studentId), status: 'active' },
-      { $set: { status: 'completed', endedAt: new Date() } }
-    );
-
-    session = await this.learningSessionModel.create({
-      studentId: new Types.ObjectId(studentId),
-      currentNodeId: nodeId,
-    });
 
     const knowledge = await this.studentKnowledgeModel.findOne({ studentId: new Types.ObjectId(studentId), nodeId });
 
@@ -127,10 +126,16 @@ export class ChatService {
 
     const messages = await this.chatMessageModel.find({ sessionId: new Types.ObjectId(sessionId) }).sort({ createdAt: 1 });
 
-    const llmMessages = messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+    const llmMessages = messages.map((m) => {
+      let content = m.content;
+      if (m.role === 'assistant') {
+        content = JSON.stringify({ message: m.content, evaluation: 'none' });
+      }
+      return {
+        role: m.role,
+        content,
+      };
+    });
 
     const rawResponse = await this.llmService.chat(llmMessages, 'json');
     let responseText = rawResponse;
@@ -140,6 +145,9 @@ export class ChatService {
       const parsed = JSON.parse(rawResponse);
       if (parsed.message) responseText = parsed.message;
       if (parsed.evaluation) evaluation = parsed.evaluation;
+      
+      // Prevent returning just "{}" if generation was weird
+      if (responseText === '{}') responseText = 'Entendi! Poderia me detalhar um pouco mais?';
     } catch (e) {
       console.error('Falha ao parsear JSON do LLM', e);
     }

@@ -77,8 +77,8 @@ export default function ResultPage() {
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen p-4 md:p-8 w-full flex flex-col items-center">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4">
@@ -166,7 +166,7 @@ export default function ResultPage() {
         <div className="mt-8 text-center animate-fade-in">
           <button
             onClick={() => router.push('/dashboard')}
-            className="px-8 py-4 rounded-xl gradient-primary text-white font-semibold text-lg transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-primary/25 flex items-center gap-2 mx-auto"
+            className="px-8 py-4 rounded-xl gradient-primary text-white font-semibold text-lg transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 flex items-center gap-2 mx-auto"
           >
             <BarChart3 className="w-5 h-5" />
             Ir para o Dashboard
