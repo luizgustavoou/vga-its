@@ -12,8 +12,15 @@ services:
       - /app/node_modules
       - /app/.next
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   backend:
     build:
@@ -26,14 +33,23 @@ services:
       - DATABASE_URL=mongodb://db:27017/vga_its
       - OLLAMA_BASE_URL=http://ollama:11434
       - OLLAMA_MODEL=llama3
+      - LLM_PROVIDER=ollama
     volumes:
       - ./backend:/app
       - /app/node_modules
       - /app/generated
     depends_on:
-      - db
-      - ollama
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/knowledge-graph || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   db:
     image: mongo:latest
@@ -42,6 +58,12 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   ollama:
     image: ollama/ollama:latest
@@ -57,6 +79,12 @@ services:
     # Caso contrário, o Docker apresentará erro ao subir o contêiner.
     gpus: all
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   ollama_data:
