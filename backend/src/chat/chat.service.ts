@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { LlmService } from '../llm/llm.service';
@@ -12,6 +12,8 @@ import { StudentService } from '../student/student.service';
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
+
   constructor(
     @InjectModel(LearningSession.name) private learningSessionModel: Model<LearningSession>,
     @InjectModel(ChatMessage.name) private chatMessageModel: Model<ChatMessage>,
@@ -118,6 +120,8 @@ export class ChatService {
     const session = await this.learningSessionModel.findById(sessionId);
     if (!session) throw new NotFoundException('Sessão não encontrada');
 
+    this.logger.log(`Nova mensagem recebida na sessão ${sessionId}. Estudante: ${session.studentId}, Conceito: ${session.currentNodeId}`);
+
     await this.chatMessageModel.create({
       sessionId: new Types.ObjectId(sessionId),
       role: 'user',
@@ -148,19 +152,26 @@ export class ChatService {
       
       // Prevent returning just "{}" if generation was weird
       if (responseText === '{}') responseText = 'Entendi! Poderia me detalhar um pouco mais?';
+
+      this.logger.log(`LLM avaliou a resposta como: ${evaluation}`);
+      this.logger.debug(`Resposta gerada pelo LLM: ${responseText}`);
     } catch (e) {
-      console.error('Falha ao parsear JSON do LLM', e);
+      this.logger.error(`Falha ao parsear JSON do LLM: ${rawResponse}`, e);
     }
 
     let updatedMastery: number | undefined;
 
     if (['correct', 'incorrect', 'correct_with_hint'].includes(evaluation)) {
+      this.logger.log(`Chamando studentService.updateMastery para evento: ${evaluation}`);
       const masteryResult = await this.studentService.updateMastery(
         session.studentId.toString(),
         session.currentNodeId,
         evaluation as 'correct' | 'incorrect' | 'correct_with_hint'
       );
       updatedMastery = masteryResult.masteryLevel;
+      this.logger.log(`Novo nível de proficiência retornado: ${updatedMastery}`);
+    } else {
+      this.logger.log(`Nenhuma atualização de proficiência necessária para a avaliação: ${evaluation}`);
     }
 
     await this.chatMessageModel.create({

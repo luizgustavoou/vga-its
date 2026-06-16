@@ -14,7 +14,7 @@ import { LlmModule } from './llm/llm.module';
       pinoHttp: {
         transport:
           process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty', options: { singleLine: true } }
+            ? { target: 'pino-pretty', options: { singleLine: true, colorize: true } }
             : undefined,
       },
     }),

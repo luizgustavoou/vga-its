@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -11,6 +11,8 @@ import { Assessment } from '../schemas/assessment.schema';
 
 @Injectable()
 export class StudentService {
+  private readonly logger = new Logger(StudentService.name);
+
   constructor(
     @InjectModel(Student.name) private studentModel: Model<Student>,
     @InjectModel(StudentKnowledge.name) private studentKnowledgeModel: Model<StudentKnowledge>,
@@ -137,6 +139,8 @@ export class StudentService {
     nodeId: string,
     event: 'correct' | 'incorrect' | 'correct_with_hint',
   ) {
+    this.logger.log(`Calculando nova proficiência para estudante ${studentId} no conceito ${nodeId}. Evento: ${event}`);
+
     let knowledge = await this.studentKnowledgeModel.findOne({
       studentId: new Types.ObjectId(studentId),
       nodeId,
@@ -187,6 +191,8 @@ export class StudentService {
       status = 'not_started';
     }
 
+    const previousMastery = knowledge.masteryLevel;
+
     knowledge.masteryLevel = newMastery;
     knowledge.status = status;
     knowledge.exercisesCount = newExercises;
@@ -194,6 +200,8 @@ export class StudentService {
     knowledge.hintCount = knowledge.hintCount + hintIncrement;
 
     await knowledge.save();
+
+    this.logger.log(`Proficiência atualizada: de ${previousMastery} para ${newMastery}. Novo status: ${status}. Exercícios: ${newExercises}`);
 
     const node = await this.knowledgeNodeModel.findOne({ nodeId });
 
