@@ -4,24 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudentStore } from '@/store/student-store';
 import { studentApi, knowledgeApi } from '@/lib/api';
+import { KnowledgeGraph, type KnowledgeNodeData } from '@/components/knowledge-graph';
 import {
   Brain, BookOpen, Target, TrendingUp, MessageCircle,
   CheckCircle2, Clock, AlertTriangle, CircleDot, LogOut,
   ArrowRight
 } from 'lucide-react';
-
-interface KnowledgeNode {
-  id: string;
-  label: string;
-  description: string;
-  order: number;
-  category: string;
-  prerequisites: string[];
-  masteryLevel: number;
-  status: string;
-  exercisesCount: number;
-  correctCount: number;
-}
 
 interface Progress {
   student: { id: string; name: string; email: string };
@@ -45,8 +33,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { studentId, studentName, logout } = useStudentStore();
   const [progress, setProgress] = useState<Progress | null>(null);
-  const [nodes, setNodes] = useState<KnowledgeNode[]>([]);
-  const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null);
+  const [nodes, setNodes] = useState<KnowledgeNodeData[]>([]);
+  const [selectedNode, setSelectedNode] = useState<KnowledgeNodeData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,15 +60,6 @@ export default function DashboardPage() {
     }
   };
 
-  const getNodeStatusClass = (status: string) => {
-    switch (status) {
-      case 'mastered': return 'node-mastered';
-      case 'in_progress': return 'node-in-progress';
-      case 'struggling': return 'node-struggling';
-      default: return 'node-not-started';
-    }
-  };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'mastered': return <CheckCircle2 className="w-5 h-5" />;
@@ -99,8 +78,22 @@ export default function DashboardPage() {
     }
   };
 
+  const getNodeStatusClass = (status: string) => {
+    switch (status) {
+      case 'mastered': return 'node-mastered';
+      case 'in_progress': return 'node-in-progress';
+      case 'struggling': return 'node-struggling';
+      default: return 'node-not-started';
+    }
+  };
+
   const handleStartStudy = (nodeId: string) => {
     router.push(`/chat?nodeId=${nodeId}`);
+  };
+
+  const handleNodeClick = (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    setSelectedNode(selectedNode?.id === nodeId ? null : node || null);
   };
 
   const handleLogout = () => {
@@ -162,7 +155,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Knowledge Graph */}
+          {/* Knowledge Graph with React Flow */}
           <div className="lg:col-span-2">
             <div className="glass-card p-6 lg:p-8 animate-slide-up">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
@@ -173,7 +166,7 @@ export default function DashboardPage() {
               </h2>
 
               {/* Legend */}
-              <div className="flex flex-wrap gap-3 mb-6 text-xs">
+              <div className="flex flex-wrap gap-3 mb-4 text-xs">
                 {[
                   { label: 'Dominado', cls: 'node-mastered' },
                   { label: 'Em progresso', cls: 'node-in-progress' },
@@ -186,67 +179,50 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              {/* Graph nodes */}
-              <div className="space-y-2">
-                {nodes.map((node, i) => (
-                  <div
-                    key={node.id}
-                    onClick={() => setSelectedNode(selectedNode?.id === node.id ? null : node)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer ${getNodeStatusClass(node.status)} hover:scale-[1.01]`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {getStatusIcon(node.status)}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold opacity-60">{node.id}</span>
-                            <span className="font-semibold text-sm">{node.label}</span>
-                          </div>
-                          <p className="text-xs opacity-70 mt-0.5">
-                            {node.category === 'matrices' ? '📊 Matrizes' : '📐 Vetores'}
-                          </p>
+              {/* React Flow Graph */}
+              <KnowledgeGraph nodes={nodes} onNodeClick={handleNodeClick} />
+
+              {/* Selected node details */}
+              {selectedNode && (
+                <div className={`mt-4 p-5 rounded-xl border-2 animate-fade-in ${getNodeStatusClass(selectedNode.status)}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(selectedNode.status)}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold opacity-60">{selectedNode.id}</span>
+                          <span className="font-semibold">{selectedNode.label}</span>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-bold">{Math.round(node.masteryLevel)}%</span>
-                        <p className="text-xs opacity-70">{getStatusLabel(node.status)}</p>
+                        <p className="text-xs opacity-70">
+                          {selectedNode.category === 'matrices' ? '📊 Matrizes' : '📐 Vetores'}
+                        </p>
                       </div>
                     </div>
-
-                    {/* Expanded info */}
-                    {selectedNode?.id === node.id && (
-                      <div className="mt-4 pt-4 border-t border-current/20 animate-fade-in">
-                        <p className="text-sm opacity-80 mb-3">{node.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs opacity-60">
-                            {node.exercisesCount} exercícios • {node.correctCount} acertos
-                          </span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleStartStudy(node.id); }}
-                            className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-medium transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
-                          >
-                            <MessageCircle className="w-4 h-4" /> Estudar
-                          </button>
-                        </div>
-                        {/* Mastery bar */}
-                        <div className="h-1.5 bg-black/20 rounded-full mt-3 overflow-hidden">
-                          <div
-                            className="h-full bg-current rounded-full transition-all duration-500"
-                            style={{ width: `${node.masteryLevel}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Connector */}
-                    {i < nodes.length - 1 && (
-                      <div className="flex justify-center mt-2">
-                        <div className="w-0.5 h-3 bg-current/30 rounded" />
-                      </div>
-                    )}
+                    <div className="text-right">
+                      <span className="text-lg font-bold">{Math.round(selectedNode.masteryLevel)}%</span>
+                      <p className="text-xs opacity-70">{getStatusLabel(selectedNode.status)}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm opacity-80 mb-3">{selectedNode.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs opacity-60">
+                      {selectedNode.exercisesCount} exercícios • {selectedNode.correctCount} acertos
+                    </span>
+                    <button
+                      onClick={() => handleStartStudy(selectedNode.id)}
+                      className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-medium transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Estudar
+                    </button>
+                  </div>
+                  <div className="h-1.5 bg-black/20 rounded-full mt-3 overflow-hidden">
+                    <div
+                      className="h-full bg-current rounded-full transition-all duration-500"
+                      style={{ width: `${selectedNode.masteryLevel}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

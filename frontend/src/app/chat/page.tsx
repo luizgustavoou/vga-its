@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useStudentStore } from '@/store/student-store';
 import { chatApi, studentApi, knowledgeApi } from '@/lib/api';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 import {
   Brain, Send, ArrowLeft, Lightbulb, BookOpen,
   MessageCircle, Loader2, TrendingUp
@@ -217,7 +218,11 @@ function ChatContent() {
                     <Brain className="w-3 h-3" /> Tutor IA
                   </div>
                 )}
-                <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                {msg.role === 'assistant' ? (
+                  <MarkdownRenderer content={msg.content} className="text-sm leading-relaxed" />
+                ) : (
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                )}
               </div>
             </div>
           ))}
