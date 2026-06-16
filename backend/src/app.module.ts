@@ -16,6 +16,32 @@ import { LlmModule } from './llm/llm.module';
           process.env.NODE_ENV !== 'production'
             ? { target: 'pino-pretty', options: { singleLine: true, colorize: true } }
             : undefined,
+        serializers: {
+          req(req) {
+            return {
+              method: req.method,
+              url: req.url,
+              params: req.params,
+              query: req.query,
+              body: req.body,
+            };
+          },
+
+          res(res) {
+            return {
+              statusCode: res.statusCode,
+              responseTime: res.responseTime,
+            };
+          },
+
+          err(err) {
+            return {
+              type: err.name,
+              message: err.message,
+              stack: err.stack,
+            };
+          },
+        },
       },
     }),
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,4 +53,4 @@ import { LlmModule } from './llm/llm.module';
     LlmModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
