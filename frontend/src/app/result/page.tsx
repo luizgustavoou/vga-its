@@ -77,21 +77,21 @@ export default function ResultPage() {
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8 w-full flex flex-col items-center">
+    <main className="min-h-screen px-4 py-6 md:px-8 md:py-8 w-full flex flex-col items-center">
       <div className="w-full max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4">
-            <Trophy className="w-8 h-8 text-white" />
+        <div className="text-center mb-6 md:mb-8 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl gradient-primary mb-4">
+            <Trophy className="w-7 h-7 md:w-8 md:h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Resultado da Avaliação</h1>
-          <p className="text-muted-foreground">Olá, {studentName}! Veja seu desempenho em cada conceito.</p>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Resultado da Avaliação</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Olá, {studentName}! Veja seu desempenho em cada conceito.</p>
         </div>
 
         {/* Overall Score */}
-        <div className="glass-card p-6 mb-6 animate-slide-up flex items-center gap-6">
-          <div className="relative w-24 h-24 shrink-0">
-            <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+        <div className="glass-card p-5 md:p-6 mb-4 md:mb-6 animate-slide-up flex flex-col sm:flex-row items-center gap-4 md:gap-6">
+          <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0">
+            <svg className="w-20 h-20 md:w-24 md:h-24 transform -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
               <circle
                 cx="50" cy="50" r="40" fill="none" strokeWidth="8"
@@ -108,11 +108,11 @@ export default function ResultPage() {
               </defs>
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold">{overallScore}%</span>
+              <span className="text-xl md:text-2xl font-bold">{overallScore}%</span>
             </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold flex items-center gap-2">
+          <div className="text-center sm:text-left">
+            <h2 className="text-lg md:text-xl font-semibold flex items-center justify-center sm:justify-start gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
               Pontuação Geral
             </h2>
@@ -127,24 +127,24 @@ export default function ResultPage() {
           {results.map((result, i) => (
             <div
               key={result.nodeId}
-              className="glass-card p-5 animate-slide-up"
+              className="glass-card p-4 md:p-5 animate-slide-up"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold">
+              <div className="flex items-start sm:items-center justify-between gap-3 mb-3">
+                <div className="flex items-start sm:items-center gap-2 md:gap-3 min-w-0">
+                  <span className="px-2 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold shrink-0">
                     {result.nodeId}
                   </span>
-                  <div>
-                    <h3 className="font-semibold text-sm md:text-base">{result.label}</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-sm md:text-base truncate">{result.label}</h3>
                     <p className="text-xs text-muted-foreground">
                       <BookOpen className="w-3 h-3 inline mr-1" />
                       {result.category === 'matrices' ? 'Matrizes' : 'Vetores'} • {result.correct}/{result.total} acertos
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className={`text-lg font-bold ${getMasteryColor(result.mastery)}`}>
+                <div className="text-right shrink-0">
+                  <span className={`text-base md:text-lg font-bold ${getMasteryColor(result.mastery)}`}>
                     {result.mastery}%
                   </span>
                   <p className={`text-xs ${getMasteryColor(result.mastery)}`}>
@@ -163,10 +163,10 @@ export default function ResultPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-8 text-center animate-fade-in">
+        <div className="mt-6 md:mt-8 text-center animate-fade-in">
           <button
             onClick={() => router.push('/dashboard')}
-            className="px-8 py-4 rounded-xl gradient-primary text-white font-semibold text-lg transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 flex items-center gap-2 mx-auto"
+            className="w-full sm:w-auto px-8 py-3.5 md:py-4 rounded-xl gradient-primary text-white font-semibold text-base md:text-lg transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 mx-auto"
           >
             <BarChart3 className="w-5 h-5" />
             Ir para o Dashboard

@@ -120,7 +120,7 @@ export function KnowledgeGraph({ nodes: knowledgeNodes, onNodeClick }: Knowledge
   );
 
   return (
-    <div className="w-full h-[600px] rounded-xl overflow-hidden border border-border/30">
+    <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden border border-border/30">
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}

@@ -169,45 +169,46 @@ function ChatContent() {
   return (
     <main className="absolute inset-0 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="glass-card rounded-none border-x-0 border-t-0 p-4 shrink-0 w-full flex justify-center">
-        <div className="w-full max-w-5xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="glass-card rounded-none border-x-0 border-t-0 px-3 py-3 md:px-4 md:py-4 shrink-0 w-full flex justify-center">
+        <div className="w-full max-w-5xl flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
             <button
               onClick={() => router.push('/dashboard')}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+              aria-label="Voltar ao dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="p-2 rounded-xl gradient-primary">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl gradient-primary shrink-0">
+              <Brain className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <div>
-              <h1 className="font-semibold text-sm">Tutor de Álgebra Linear</h1>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <BookOpen className="w-3 h-3" />
-                {currentNode?.label || 'Carregando...'}
+            <div className="min-w-0">
+              <h1 className="font-semibold text-sm truncate">Tutor de Álgebra Linear</h1>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                <BookOpen className="w-3 h-3 shrink-0" />
+                <span className="truncate">{currentNode?.label || 'Carregando...'}</span>
               </p>
             </div>
           </div>
           {currentNode && (
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold">{Math.round(currentNode.masteryLevel)}%</span>
+            <div className="flex items-center gap-1.5 md:gap-2 shrink-0 px-2 md:px-3 py-1.5 rounded-lg bg-primary/10">
+              <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+              <span className="text-xs md:text-sm font-semibold text-primary">{Math.round(currentNode.masteryLevel)}%</span>
             </div>
           )}
         </div>
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 w-full flex flex-col items-center">
-        <div className="w-full max-w-3xl space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6 w-full flex flex-col items-center">
+        <div className="w-full max-w-3xl space-y-3 md:space-y-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
               <div
-                className={`w-fit max-w-[85%] md:max-w-[70%] px-5 py-3 rounded-2xl ${
+                className={`w-fit max-w-[90%] sm:max-w-[80%] md:max-w-[70%] px-4 py-3 md:px-5 rounded-2xl ${
                   msg.role === 'user'
                     ? 'gradient-primary text-white rounded-br-md'
                     : 'glass-card rounded-bl-md'
@@ -229,7 +230,7 @@ function ChatContent() {
 
           {loading && (
             <div className="flex justify-start animate-fade-in w-full">
-              <div className="w-fit px-5 py-3 glass-card rounded-2xl rounded-bl-md">
+              <div className="w-fit px-4 py-3 md:px-5 glass-card rounded-2xl rounded-bl-md">
                 <div className="flex items-center gap-2 text-primary">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Tutor está pensando...</span>
@@ -243,37 +244,49 @@ function ChatContent() {
       </div>
 
       {/* Quick actions */}
-      <div className="shrink-0 px-4 pb-2 w-full flex justify-center">
-        <div className="w-full max-w-3xl flex flex-wrap gap-2">
-          <button onClick={handleExplain} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 shrink-0" /> Explicar conceito
+      <div className="shrink-0 px-3 md:px-4 pb-2 w-full flex justify-center">
+        <div className="w-full max-w-3xl flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={handleExplain}
+            disabled={loading}
+            className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-muted border border-border/50 text-xs md:text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2 whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            <BookOpen className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Explicar
           </button>
-          <button onClick={handleExercise} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
-            <MessageCircle className="w-4 h-4 shrink-0" /> Criar exercício
+          <button
+            onClick={handleExercise}
+            disabled={loading}
+            className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-muted border border-border/50 text-xs md:text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2 whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            <MessageCircle className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Exercício
           </button>
-          <button onClick={handleHint} className="px-5 py-2.5 rounded-xl bg-muted border border-border/50 text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 shrink-0" /> Pedir dica
+          <button
+            onClick={handleHint}
+            disabled={loading}
+            className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-muted border border-border/50 text-xs md:text-sm font-medium text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2 whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            <Lightbulb className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Dica
           </button>
         </div>
       </div>
 
       {/* Input */}
-      <div className="shrink-0 px-4 pb-6 pt-2 w-full flex justify-center bg-background/80 backdrop-blur-md">
-        <form onSubmit={handleSubmit} className="w-full max-w-3xl flex items-center gap-2 bg-muted/40 p-2 rounded-2xl border border-border/50 shadow-sm focus-within:border-primary/50 transition-colors">
+      <div className="shrink-0 px-3 md:px-4 pb-4 md:pb-6 pt-2 w-full flex justify-center bg-background/80 backdrop-blur-md safe-area-bottom">
+        <form onSubmit={handleSubmit} className="w-full max-w-3xl flex items-center gap-2 bg-muted/40 p-1.5 md:p-2 rounded-2xl border border-border/50 shadow-sm focus-within:border-primary/50 transition-colors">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua mensagem..."
             disabled={loading}
-            className="flex-1 bg-transparent px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
+            className="flex-1 bg-transparent px-3 py-2.5 md:px-4 md:py-3 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm md:text-base min-w-0"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="shrink-0 p-3.5 rounded-xl gradient-primary text-white font-medium transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="shrink-0 p-3 md:p-3.5 rounded-xl gradient-primary text-white font-medium transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </form>
       </div>
