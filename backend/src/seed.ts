@@ -104,43 +104,9 @@ const assessmentQuestions = [
     correctAnswer: '2x3',
     difficulty: 1,
   },
-  {
-    questionId: 'q-m1-2',
-    nodeId: 'M1',
-    questionText: 'Uma matriz identidade 3x3 possui quais valores na diagonal principal?',
-    options: JSON.stringify(['0', '1', '-1', '3']),
-    correctAnswer: '1',
-    difficulty: 1,
-  },
-  {
-    questionId: 'q-m1-3',
-    nodeId: 'M1',
-    questionText: 'Uma matriz quadrada é aquela em que:',
-    options: JSON.stringify([
-      'O número de linhas é igual ao número de colunas',
-      'Todos os elementos são iguais',
-      'O determinante é zero',
-      'Todos os elementos são positivos',
-    ]),
-    correctAnswer: 'O número de linhas é igual ao número de colunas',
-    difficulty: 1,
-  },
   // M2 - Operações com Matrizes
   {
     questionId: 'q-m2-1',
-    nodeId: 'M2',
-    questionText: 'Dadas A = [[1, 2], [3, 4]] e B = [[5, 6], [7, 8]], qual é A + B?',
-    options: JSON.stringify([
-      '[[6, 8], [10, 12]]',
-      '[[4, 4], [4, 4]]',
-      '[[5, 12], [21, 32]]',
-      '[[6, 8], [9, 12]]',
-    ]),
-    correctAnswer: '[[6, 8], [10, 12]]',
-    difficulty: 1,
-  },
-  {
-    questionId: 'q-m2-2',
     nodeId: 'M2',
     questionText: 'Para que a multiplicação A·B seja possível, é necessário que:',
     options: JSON.stringify([
@@ -152,19 +118,6 @@ const assessmentQuestions = [
     correctAnswer: 'O número de colunas de A seja igual ao número de linhas de B',
     difficulty: 2,
   },
-  {
-    questionId: 'q-m2-3',
-    nodeId: 'M2',
-    questionText: 'Se A = [[2, 0], [1, 3]] e k = 3, qual é k·A?',
-    options: JSON.stringify([
-      '[[6, 0], [3, 9]]',
-      '[[5, 3], [4, 6]]',
-      '[[6, 3], [3, 9]]',
-      '[[2, 0], [1, 9]]',
-    ]),
-    correctAnswer: '[[6, 0], [3, 9]]',
-    difficulty: 1,
-  },
   // M3 - Determinantes
   {
     questionId: 'q-m3-1',
@@ -174,43 +127,9 @@ const assessmentQuestions = [
     correctAnswer: '10',
     difficulty: 1,
   },
-  {
-    questionId: 'q-m3-2',
-    nodeId: 'M3',
-    questionText: 'Se o determinante de uma matriz é zero, então:',
-    options: JSON.stringify([
-      'A matriz é singular (não inversível)',
-      'A matriz é identidade',
-      'A matriz é diagonal',
-      'A matriz tem todos elementos positivos',
-    ]),
-    correctAnswer: 'A matriz é singular (não inversível)',
-    difficulty: 2,
-  },
-  {
-    questionId: 'q-m3-3',
-    nodeId: 'M3',
-    questionText: 'Qual o determinante da matriz [[1, 2, 3], [4, 5, 6], [7, 8, 9]]?',
-    options: JSON.stringify(['0', '1', '-1', '6']),
-    correctAnswer: '0',
-    difficulty: 3,
-  },
   // M4 - Sistemas Lineares
   {
     questionId: 'q-m4-1',
-    nodeId: 'M4',
-    questionText: 'Um sistema linear com determinante principal diferente de zero é classificado como:',
-    options: JSON.stringify([
-      'Sistema Possível e Determinado (SPD)',
-      'Sistema Possível e Indeterminado (SPI)',
-      'Sistema Impossível (SI)',
-      'Sistema Homogêneo',
-    ]),
-    correctAnswer: 'Sistema Possível e Determinado (SPD)',
-    difficulty: 2,
-  },
-  {
-    questionId: 'q-m4-2',
     nodeId: 'M4',
     questionText: 'No sistema { x + y = 5, x - y = 1 }, quais são os valores de x e y?',
     options: JSON.stringify([
@@ -236,36 +155,6 @@ const assessmentQuestions = [
     correctAnswer: 'Módulo, direção e sentido',
     difficulty: 1,
   },
-  {
-    questionId: 'q-v1-2',
-    nodeId: 'V1',
-    questionText: 'O vetor nulo é aquele cujo módulo é:',
-    options: JSON.stringify(['0', '1', '-1', 'Indefinido']),
-    correctAnswer: '0',
-    difficulty: 1,
-  },
-  // V2 - Representação Vetorial
-  {
-    questionId: 'q-v2-1',
-    nodeId: 'V2',
-    questionText: 'O vetor que vai do ponto A(1, 2) ao ponto B(4, 6) é:',
-    options: JSON.stringify([
-      '(3, 4)',
-      '(5, 8)',
-      '(4, 6)',
-      '(-3, -4)',
-    ]),
-    correctAnswer: '(3, 4)',
-    difficulty: 1,
-  },
-  {
-    questionId: 'q-v2-2',
-    nodeId: 'V2',
-    questionText: 'Um vetor unitário tem módulo igual a:',
-    options: JSON.stringify(['1', '0', '-1', '2']),
-    correctAnswer: '1',
-    difficulty: 1,
-  },
   // V3 - Operações com Vetores
   {
     questionId: 'q-v3-1',
@@ -273,19 +162,6 @@ const assessmentQuestions = [
     questionText: 'Dados u = (2, 3) e v = (1, -1), qual é u + v?',
     options: JSON.stringify(['(3, 2)', '(1, 4)', '(3, -3)', '(-1, 4)']),
     correctAnswer: '(3, 2)',
-    difficulty: 1,
-  },
-  {
-    questionId: 'q-v3-2',
-    nodeId: 'V3',
-    questionText: 'Se v = (4, -2) e k = -2, qual é k·v?',
-    options: JSON.stringify([
-      '(-8, 4)',
-      '(8, -4)',
-      '(-8, -4)',
-      '(2, -4)',
-    ]),
-    correctAnswer: '(-8, 4)',
     difficulty: 1,
   },
   // V4 - Módulo de Vetores
@@ -297,19 +173,6 @@ const assessmentQuestions = [
     correctAnswer: '5',
     difficulty: 1,
   },
-  {
-    questionId: 'q-v4-2',
-    nodeId: 'V4',
-    questionText: 'Para normalizar um vetor, devemos:',
-    options: JSON.stringify([
-      'Dividir o vetor pelo seu módulo',
-      'Multiplicar o vetor por zero',
-      'Somar o vetor consigo mesmo',
-      'Calcular o determinante',
-    ]),
-    correctAnswer: 'Dividir o vetor pelo seu módulo',
-    difficulty: 2,
-  },
   // V5 - Produto Escalar
   {
     questionId: 'q-v5-1',
@@ -318,63 +181,6 @@ const assessmentQuestions = [
     options: JSON.stringify(['5', '11', '8', '-5']),
     correctAnswer: '5',
     difficulty: 1,
-  },
-  {
-    questionId: 'q-v5-2',
-    nodeId: 'V5',
-    questionText: 'O produto escalar de dois vetores ortogonais é:',
-    options: JSON.stringify(['0', '1', '-1', 'Indefinido']),
-    correctAnswer: '0',
-    difficulty: 2,
-  },
-  // V6 - Ângulo entre Vetores
-  {
-    questionId: 'q-v6-1',
-    nodeId: 'V6',
-    questionText: 'A fórmula do cosseno do ângulo entre dois vetores u e v é:',
-    options: JSON.stringify([
-      'cos(θ) = (u·v) / (|u|·|v|)',
-      'cos(θ) = |u|·|v| / (u·v)',
-      'cos(θ) = u + v',
-      'cos(θ) = |u - v|',
-    ]),
-    correctAnswer: 'cos(θ) = (u·v) / (|u|·|v|)',
-    difficulty: 2,
-  },
-  {
-    questionId: 'q-v6-2',
-    nodeId: 'V6',
-    questionText: 'Se o ângulo entre dois vetores é 90°, então cos(θ) é:',
-    options: JSON.stringify(['0', '1', '-1', '0.5']),
-    correctAnswer: '0',
-    difficulty: 1,
-  },
-  // V7 - Ortogonalidade
-  {
-    questionId: 'q-v7-1',
-    nodeId: 'V7',
-    questionText: 'Dois vetores são ortogonais quando:',
-    options: JSON.stringify([
-      'Seu produto escalar é zero',
-      'São paralelos',
-      'Têm o mesmo módulo',
-      'Sua soma é zero',
-    ]),
-    correctAnswer: 'Seu produto escalar é zero',
-    difficulty: 1,
-  },
-  {
-    questionId: 'q-v7-2',
-    nodeId: 'V7',
-    questionText: 'A projeção ortogonal do vetor u sobre o vetor v é dada por:',
-    options: JSON.stringify([
-      'proj_v(u) = ((u·v) / (v·v)) · v',
-      'proj_v(u) = u + v',
-      'proj_v(u) = u × v',
-      'proj_v(u) = |u| · |v|',
-    ]),
-    correctAnswer: 'proj_v(u) = ((u·v) / (v·v)) · v',
-    difficulty: 3,
   },
 ];
 
