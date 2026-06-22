@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    env_file: 
+      - ./frontend/.env
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -28,12 +28,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
-    environment:
-      - PORT=3001
-      - DATABASE_URL=mongodb://db:27017/vga_its
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - OLLAMA_MODEL=llama3
-      - LLM_PROVIDER=ollama
+    env_file: 
+      - ./backend/.env
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -41,8 +37,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      ollama:
-        condition: service_started
+      # ollama:
+      #   condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/knowledge-graph || exit 1"]
@@ -65,27 +61,27 @@ services:
       retries: 5
       start_period: 10s
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-      - OLLAMA_ORIGINS=*
-    # IMPORTANTE: Descomente a linha abaixo (gpus: all) apenas se o seu sistema 
-    # possuir uma Placa de Vídeo NVIDIA e o NVIDIA Container Toolkit instalado.
-    # Caso contrário, o Docker apresentará erro ao subir o contêiner.
-    gpus: all
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:11434/api/tags || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   environment:
+  #     - OLLAMA_HOST=0.0.0.0
+  #     - OLLAMA_ORIGINS=*
+  #   # IMPORTANTE: Descomente a linha abaixo (gpus: all) apenas se o seu sistema 
+  #   # possuir uma Placa de Vídeo NVIDIA e o NVIDIA Container Toolkit instalado.
+  #   # Caso contrário, o Docker apresentará erro ao subir o contêiner.
+  #   gpus: all
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "wget -qO- http://localhost:11434/api/tags || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 15s
 
 volumes:
-  ollama_data:
+  # ollama_data:
   mongodb_data:

@@ -1,6 +1,9 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -11,6 +14,8 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
   return (
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
           strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
@@ -21,8 +26,8 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
           ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
           li: ({ children }) => <li className="text-sm">{children}</li>,
-          code: ({ children, className }) => {
-            const isInline = !className;
+          code: ({ children, className: codeClassName }) => {
+            const isInline = !codeClassName;
             if (isInline) {
               return (
                 <code className="px-1.5 py-0.5 rounded bg-muted text-primary text-xs font-mono">

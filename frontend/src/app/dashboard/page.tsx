@@ -244,7 +244,7 @@ export default function DashboardPage() {
                   <Target className="w-4 h-4" /> Conceito Atual
                 </h3>
                 <p className="text-lg md:text-xl font-extrabold">{progress.currentConcept.label}</p>
-                
+
                 <div className="flex justify-between items-end mt-3 md:mt-4">
                   <span className="text-sm font-medium text-muted-foreground">Domínio Atual</span>
                   <span className="text-xl font-bold text-primary">{Math.round(progress.currentConcept.mastery)}%</span>
