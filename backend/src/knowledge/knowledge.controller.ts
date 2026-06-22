@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { KnowledgeService } from './knowledge.service';
 
 @ApiTags('knowledge-graph')
-@Controller('api/knowledge-graph')
+@Controller('knowledge-graph')
 export class KnowledgeController {
   constructor(private readonly knowledgeService: KnowledgeService) {}
 

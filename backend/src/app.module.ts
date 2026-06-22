@@ -7,6 +7,7 @@ import { KnowledgeModule } from './knowledge/knowledge.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { ChatModule } from './chat/chat.module';
 import { LlmModule } from './llm/llm.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -52,5 +53,6 @@ import { LlmModule } from './llm/llm.module';
     ChatModule,
     LlmModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule { }

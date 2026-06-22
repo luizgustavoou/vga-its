@@ -6,7 +6,7 @@ import { LoginStudentDto } from './dto/login-student.dto';
 import { UpdateMasteryDto } from './dto/update-mastery.dto';
 
 @ApiTags('students')
-@Controller('api/students')
+@Controller('students')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 

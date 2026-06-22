@@ -5,7 +5,7 @@ import { StartAssessmentDto } from './dto/start-assessment.dto';
 import { AnswerAssessmentDto } from './dto/answer-assessment.dto';
 
 @ApiTags('assessments')
-@Controller('api/assessments')
+@Controller('assessments')
 export class AssessmentController {
   constructor(private readonly assessmentService: AssessmentService) {}
 
