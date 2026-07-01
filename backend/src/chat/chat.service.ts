@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { LlmService } from '../llm/llm.service';
@@ -30,6 +30,30 @@ export class ChatService {
 
     const node = await this.knowledgeNodeModel.findOne({ nodeId });
     if (!node) throw new NotFoundException('Conceito não encontrado');
+
+    // ── Prerequisite Gate (Skinner's prerequisite mastery) ──────────────────
+    if (node.prerequisites && node.prerequisites.length > 0) {
+      const prereqKnowledges = await this.studentKnowledgeModel.find({
+        studentId: new Types.ObjectId(studentId),
+        nodeId: { $in: node.prerequisites },
+      });
+
+      const masteredSet = new Set(
+        prereqKnowledges.filter(k => k.status === 'mastered').map(k => k.nodeId)
+      );
+
+      const unmetPrereqs = node.prerequisites.filter(p => !masteredSet.has(p));
+
+      if (unmetPrereqs.length > 0) {
+        // Resolve labels for unmet prerequisites to show in the error message
+        const unmetNodes = await this.knowledgeNodeModel.find({ nodeId: { $in: unmetPrereqs } });
+        const unmetLabels = unmetNodes.map(n => n.label).join(', ');
+        throw new ForbiddenException(
+          `Você precisa dominar os seguintes conceitos antes: ${unmetLabels}`
+        );
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     let session = await this.learningSessionModel.findOneAndUpdate(
       { studentId: new Types.ObjectId(studentId), currentNodeId: nodeId },

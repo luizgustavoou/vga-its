@@ -8,7 +8,7 @@ import { KnowledgeGraph, type KnowledgeNodeData } from '@/components/knowledge-g
 import {
   Brain, BookOpen, Target, TrendingUp, MessageCircle,
   CheckCircle2, Clock, AlertTriangle, CircleDot, LogOut,
-  ArrowRight
+  ArrowRight, Lock
 } from 'lucide-react';
 
 interface Progress {
@@ -88,6 +88,8 @@ export default function DashboardPage() {
   };
 
   const handleStartStudy = (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (node?.isLocked) return; // Blocked by prerequisite gate
     router.push(`/chat?nodeId=${nodeId}`);
   };
 
@@ -112,7 +114,7 @@ export default function DashboardPage() {
     );
   }
 
-  const firstPendingNode = nodes.find(n => n.status !== 'mastered');
+  const firstPendingNode = nodes.find(n => n.status !== 'mastered' && !n.isLocked);
 
   return (
     <main className="min-h-screen px-4 py-6 md:px-8 md:py-8 w-full flex flex-col items-center">
@@ -216,12 +218,19 @@ export default function DashboardPage() {
                     <span className="text-xs opacity-60">
                       {selectedNode.exercisesCount} exercícios • {selectedNode.correctCount} acertos
                     </span>
-                    <button
-                      onClick={() => handleStartStudy(selectedNode.id)}
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-white text-sm font-medium transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Estudar
-                    </button>
+                    {selectedNode.isLocked ? (
+                      <div className="w-full sm:w-auto px-6 py-3 rounded-xl bg-muted/50 text-muted-foreground text-sm font-medium flex items-center justify-center gap-2 cursor-not-allowed border border-border/50">
+                        <Lock className="w-4 h-4" />
+                        Pré-requisitos pendentes
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleStartStudy(selectedNode.id)}
+                        className="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-white text-sm font-medium transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" /> Estudar
+                      </button>
+                    )}
                   </div>
                   <div className="h-1.5 bg-black/20 rounded-full mt-3 overflow-hidden">
                     <div

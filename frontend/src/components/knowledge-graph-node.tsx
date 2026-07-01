@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { CheckCircle2, Clock, AlertTriangle, CircleDot } from 'lucide-react';
+import { CheckCircle2, Clock, AlertTriangle, CircleDot, Lock } from 'lucide-react';
 
 interface KnowledgeNodeData {
   id: string;
@@ -13,15 +13,28 @@ interface KnowledgeNodeData {
   category: string;
   exercisesCount: number;
   correctCount: number;
+  isLocked: boolean;
   onNodeClick?: (nodeId: string) => void;
   [key: string]: unknown;
 }
 
 function KnowledgeGraphNodeComponent({ data }: NodeProps) {
   const nodeData = data as unknown as KnowledgeNodeData;
-  const { id, label, masteryLevel, status, category } = nodeData;
+  const { id, label, masteryLevel, status, category, isLocked } = nodeData;
 
+  // Locked nodes override any other status styling
   const getStatusConfig = () => {
+    if (isLocked) {
+      return {
+        bg: 'bg-slate-950/90',
+        border: 'border-slate-700',
+        glow: 'shadow-slate-900/10',
+        icon: <Lock className="w-4 h-4 text-slate-500" />,
+        barColor: 'bg-slate-700',
+        textColor: 'text-slate-500',
+      };
+    }
+
     switch (status) {
       case 'mastered':
         return {
@@ -69,8 +82,11 @@ function KnowledgeGraphNodeComponent({ data }: NodeProps) {
       <Handle type="target" position={Position.Top} className="!bg-primary !border-primary !w-2 !h-2" />
       <div
         className={`px-4 py-3 rounded-xl border-2 ${config.border} ${config.bg} backdrop-blur-sm 
-          cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg ${config.glow}
-          min-w-[220px] max-w-[260px]`}
+          transition-all duration-200 min-w-[220px] max-w-[260px]
+          ${isLocked
+            ? 'opacity-50 cursor-not-allowed'
+            : `cursor-pointer hover:scale-105 hover:shadow-lg ${config.glow}`
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-2 mb-2">
@@ -78,22 +94,26 @@ function KnowledgeGraphNodeComponent({ data }: NodeProps) {
             {config.icon}
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{id}</span>
           </div>
-          <span className={`text-xs font-bold ${config.textColor}`}>{Math.round(masteryLevel)}%</span>
+          <span className={`text-xs font-bold ${config.textColor}`}>
+            {isLocked ? '🔒' : `${Math.round(masteryLevel)}%`}
+          </span>
         </div>
 
         {/* Label */}
-        <p className="text-sm font-semibold text-slate-200 leading-tight mb-2">{label}</p>
+        <p className={`text-sm font-semibold leading-tight mb-2 ${isLocked ? 'text-slate-500' : 'text-slate-200'}`}>
+          {label}
+        </p>
 
-        {/* Category badge */}
-        <span className="text-[10px] text-slate-400">
-          {category === 'matrices' ? '📊 Matrizes' : '📐 Vetores'}
+        {/* Category badge / locked hint */}
+        <span className="text-[10px] text-slate-500">
+          {isLocked ? 'Complete os pré-requisitos' : (category === 'matrices' ? '📊 Matrizes' : '📐 Vetores')}
         </span>
 
         {/* Mastery bar */}
         <div className="h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
           <div
             className={`h-full ${config.barColor} rounded-full transition-all duration-500`}
-            style={{ width: `${masteryLevel}%` }}
+            style={{ width: isLocked ? '0%' : `${masteryLevel}%` }}
           />
         </div>
       </div>
