@@ -14,6 +14,59 @@ import { StudentService } from '../student/student.service';
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
 
+  /**
+   * Parses the raw LLM response (expected to be JSON) and extracts the
+   * `message` and `evaluation` fields. Multiple fallback strategies are
+   * applied because the Gemini API occasionally returns:
+   *  - JSON wrapped inside markdown code fences (```json ... ```)
+   *  - Double-escaped unicode sequences (\\ud83d instead of \ud83d)
+   *  - Slightly malformed JSON that standard JSON.parse rejects
+   */
+  private parseLlmResponse(raw: string): { message: string; evaluation: string } {
+    const fallback = { message: raw, evaluation: 'none' };
+
+    if (!raw || !raw.trim()) return fallback;
+
+    // 1. Strip markdown code fences (```json ... ``` or ``` ... ```)
+    let cleaned = raw.trim();
+    const fenceMatch = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+    if (fenceMatch) {
+      cleaned = fenceMatch[1].trim();
+    }
+
+    // 2. Try standard JSON.parse
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (parsed && typeof parsed.message === 'string') {
+        return {
+          message: parsed.message || raw,
+          evaluation: typeof parsed.evaluation === 'string' ? parsed.evaluation : 'none',
+        };
+      }
+    } catch (_) {
+      // fall through to next strategy
+    }
+
+    // 3. Regex extraction as last resort — grab the value of "message" key
+    const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?<!\\)",/);
+    if (msgMatch) {
+      try {
+        // Re-parse just the string value so escape sequences are handled
+        const messageValue = JSON.parse(`"${msgMatch[1]}"`);
+        const evalMatch = cleaned.match(/"evaluation"\s*:\s*"([^"]+)"/);
+        return {
+          message: messageValue,
+          evaluation: evalMatch ? evalMatch[1] : 'none',
+        };
+      } catch (_) {
+        // fall through
+      }
+    }
+
+    this.logger.error(`Could not parse LLM JSON response, using raw text. Raw: ${raw.slice(0, 200)}`);
+    return fallback;
+  }
+
   constructor(
     @InjectModel(LearningSession.name) private learningSessionModel: Model<LearningSession>,
     @InjectModel(ChatMessage.name) private chatMessageModel: Model<ChatMessage>,
@@ -94,11 +147,7 @@ export class ChatService {
       },
     ], 'json');
 
-    let greeting = rawGreeting;
-    try {
-      const parsed = JSON.parse(rawGreeting);
-      greeting = parsed.message || rawGreeting;
-    } catch (e) {}
+    const { message: greeting } = this.parseLlmResponse(rawGreeting);
 
     await this.chatMessageModel.create({
       sessionId: session._id,
@@ -142,22 +191,13 @@ export class ChatService {
     });
 
     const rawResponse = await this.llmService.chat(llmMessages, 'json');
-    let responseText = rawResponse;
-    let evaluation = 'none';
+    const { message: parsedMessage, evaluation } = this.parseLlmResponse(rawResponse);
 
-    try {
-      const parsed = JSON.parse(rawResponse);
-      if (parsed.message) responseText = parsed.message;
-      if (parsed.evaluation) evaluation = parsed.evaluation;
-      
-      // Prevent returning just "{}" if generation was weird
-      if (responseText === '{}') responseText = 'Entendi! Poderia me detalhar um pouco mais?';
+    // Prevent returning just "{}" if generation was weird
+    const responseText = parsedMessage === '{}' ? 'Entendi! Poderia me detalhar um pouco mais?' : parsedMessage;
 
-      this.logger.log(`LLM avaliou a resposta como: ${evaluation}`);
-      this.logger.debug(`Resposta gerada pelo LLM: ${responseText}`);
-    } catch (e) {
-      this.logger.error(`Falha ao parsear JSON do LLM: ${rawResponse}`, e);
-    }
+    this.logger.log(`LLM avaliou a resposta como: ${evaluation}`);
+    this.logger.debug(`Resposta gerada pelo LLM: ${responseText}`);
 
     let updatedMastery: number | undefined;
 
