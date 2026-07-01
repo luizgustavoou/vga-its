@@ -25,6 +25,7 @@ export interface KnowledgeNodeData {
   status: string;
   exercisesCount: number;
   correctCount: number;
+  isLocked: boolean;
 }
 
 interface KnowledgeGraphProps {

@@ -28,19 +28,28 @@ export class KnowledgeService {
     const nodes = await this.knowledgeNodeModel.find().sort({ order: 1 });
     const knowledges = await this.studentKnowledgeModel.find({ studentId: new Types.ObjectId(studentId) });
 
+    // Build a quick lookup of mastered nodes for prerequisite checking
+    const masteredNodeIds = new Set(
+      knowledges.filter(k => k.status === 'mastered').map(k => k.nodeId)
+    );
+
     return nodes.map((node) => {
       const knowledge = knowledges.find(k => k.nodeId === node.nodeId);
+      const prereqs = node.prerequisites || [];
+      const isLocked = prereqs.length > 0 && prereqs.some(p => !masteredNodeIds.has(p));
+
       return {
         id: node.nodeId,
         label: node.label,
         description: node.description,
         order: node.order,
         category: node.category,
-        prerequisites: node.prerequisites || [],
+        prerequisites: prereqs,
         masteryLevel: knowledge?.masteryLevel ?? 0,
         status: knowledge?.status ?? 'not_started',
         exercisesCount: knowledge?.exercisesCount ?? 0,
         correctCount: knowledge?.correctCount ?? 0,
+        isLocked,
       };
     });
   }

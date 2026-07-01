@@ -64,7 +64,7 @@ function ChatContent() {
       const node = graphRes.data.find((n: NodeInfo) => n.id === nodeId);
       if (node) setCurrentNode(node);
 
-      // Create session
+      // Create session — may throw 403 if prerequisites not met
       const sessionRes = await chatApi.createSession(studentId!, nodeId);
       setCurrentSessionId(sessionRes.data.sessionId);
 
@@ -85,8 +85,18 @@ function ChatContent() {
           },
         ]);
       }
-    } catch {
-      console.error('Erro ao inicializar chat');
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message;
+
+      if (status === 403) {
+        // Prerequisite gate — inform user and go back to dashboard
+        alert(`🔒 Acesso bloqueado\n\n${message || 'Você precisa dominar os pré-requisitos antes de acessar este conceito.'}`);
+        router.push('/dashboard');
+        return;
+      }
+
+      console.error('Erro ao inicializar chat', err);
     } finally {
       setInitializing(false);
     }
